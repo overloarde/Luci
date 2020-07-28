@@ -83,28 +83,8 @@ def recive():
             with open("Db/text_log.txt" , "a") as log:
                 log.write( '<{}>\t{}'.format(nick , dump['text'])+ '\n')
         else:
-            if '{}quote'.format(prefix) in dump['text']:
-                quote()
-            if '{}reddit '.format(prefix) in dump['text'] :
-                try :
-                    command , sub = dump['text'].split(" ")
-                except ValueError:
-                    try :
-                        command , sub , sec = dump['text'].split(" ")
-                        sub = sub + sec
-                    except ValueError:
-                        ws.send(json.dumps({"cmd" : "chat" , "text" :"enter 1 sub  , not more not less"}))
-                main(sub)
-            if '{}coffee'.format(prefix) in dump['text']:
-                ws.send(json.dumps({"cmd" :"chat" , "text":"/me sips coffee for {}".format(dump["nick"])}))
-            if '{}lyrics'.format(prefix) in dump["text"]:
-                song = dump['text'].strip('{}lyrics'.format(prefix))
-                bakup.main_l(song)
-                with open("Db/lyrics.txt" , 'r') as lyrics :
-                    for line in lyrics :
-                        if not line.isspace():
-                            ws.send(json.dumps({"cmd": "chat" , "text" : '{}'.format(line)}))
-                            time.sleep(5)
+            if prefix in dump['text'] :
+                anaylizor(dump['text'] , dump['nick'])
 
             global last_sender
             last_sender = dump['nick']
@@ -200,6 +180,29 @@ def quote():
     cmd = {'cmd' :"chat" , "text" :txt }
     ws.send(json.dumps(cmd))
 
+def anaylizor(string , user_nick):
+    if "coffee" in  string :
+        ws.send(json.dumps({"cmd" :"chat" , "text":"/me sips coffee for {}".format(user_nick)}))
+    elif "reddit" in string :
+        try :
+            command , sub = string.split(" ")
+        except ValueError:
+            try :
+                command , sub , sec = string.split(" ")
+                sub = sub + sec
+            except ValueError:
+                ws.send(json.dumps({"cmd" : "chat" , "text" :"enter 1 sub  , not more not less"}))
+        main(sub)
+    #elif "lyrics" in string:
+        #song = string.strip('{}lyrics'.format(prefix))
+        #bakup.main_l(song)
+        #with open("Db/lyrics.txt" , 'r') as lyrics :
+            #for line in lyrics :
+                #if not line.isspace():
+                    #ws.send(json.dumps({"cmd": "chat" , "text" : '{}'.format(line)}))
+                    #time.sleep(5)
+    elif "quote" in string :
+        quote()
 
 stay = threading.Thread(target = stay)
 sendmsg = threading.Thread(target = constant2)
